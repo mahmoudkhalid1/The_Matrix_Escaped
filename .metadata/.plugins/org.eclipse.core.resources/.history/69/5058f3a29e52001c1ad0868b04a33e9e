@@ -1,0 +1,155 @@
+package code;
+
+import java.util.Random;
+import code.Location;
+import code.TreeNode;
+import code.Queue.*;
+
+import java.util.ArrayList;
+
+public class Matrix extends GeneralSearch{
+	
+	public Matrix () {
+		super();
+	}
+	
+	public static String genGrid() {
+		String grid = "";
+		Random rand = new Random();
+		int m = rand.nextInt((15 - 5) + 1) + 5;
+		int n = rand.nextInt((15 - 5) + 1) + 5;
+		ArrayList<Location> availableLocations = generateLocations(m,n);
+		int c = rand.nextInt((4 - 1) + 1) + 1;
+		grid = m + "," + n + ";" + c + ";";
+		//pick random indices for each object then remove the location at that index at the array
+		int neoIndex = rand.nextInt(availableLocations.size() + 1);
+		Location neo = availableLocations.get(neoIndex);
+		grid += neo.x + "," + neo.y + ";";
+		availableLocations.remove(neoIndex);
+		//telephone
+		int teleIndex = rand.nextInt(availableLocations.size() + 1);
+		Location tele = availableLocations.get(teleIndex);
+		grid += tele.x + "," + tele.y + ";";
+		availableLocations.remove(teleIndex);
+		int hostagesNum = 0;
+		// check to avoid overflow of hostages
+		// generate number of hostages first since there is a restriction on it
+		hostagesNum = rand.nextInt((10 - 3) + 1) + 3;
+		while (hostagesNum > availableLocations.size() - 4) {
+			//minus 4 to reserve place for at least one agent and one pill and two pads
+			// try again
+			hostagesNum = rand.nextInt((10 - 3) + 1) + 3;
+		}
+		// the number of hostages is suitable
+		// assign them to cells and add them to the grid string
+		// since agents come first create a new string and append it to the grid string
+		String hostages = "";
+		for (int i = 0; i < hostagesNum; i++) {
+			int hosIndex = rand.nextInt(availableLocations.size() + 1);
+			Location hos = availableLocations.get(hosIndex);
+			int damage = rand.nextInt((99 - 1) + 1) + 1;
+			grid += hos.x + "," + hos.y + ","  + damage;
+			availableLocations.remove(hosIndex);
+			// to add the comma after each hostage
+			if (i < hostagesNum - 1) {
+				hostages += ",";
+			}
+		}
+		hostages += ";";
+		int agentsNum = rand.nextInt(availableLocations.size() - 2);
+		System.out.println(agentsNum);
+		System.out.println(availableLocations.size() - 2);
+		for (int i = 0; i < agentsNum; i++) {
+			int ageIndex = rand.nextInt(availableLocations.size() + 1);
+			System.out.println(availableLocations.size() );
+			Location age = availableLocations.get(ageIndex);
+			grid += age.x + "," + age.y;
+			availableLocations.remove(ageIndex);
+			// to add the comma after each hostage
+			if (i < agentsNum - 1) {
+				grid += ",";
+			}
+		}
+		grid += ";";
+		
+		int pillsNum = rand.nextInt((availableLocations.size() - 1) + 1);
+		for (int i = 0; i < pillsNum; i++) {
+			int pillIndex = rand.nextInt(availableLocations.size() + 1);
+			Location pill = availableLocations.get(pillIndex);
+			grid += pill.x + "," + pill.y;
+			availableLocations.remove(pillIndex);
+			// to add the comma after each hostage
+			if (i < pillsNum - 1) {
+				grid += ",";
+			}
+		}
+		grid += ";";
+		int padsNum = rand.nextInt((availableLocations.size() + 1) + 1);
+		// check if the number is divisible by 2
+		while (padsNum % 2 != 0) {
+			// try again
+			padsNum = rand.nextInt((availableLocations.size() + 1) + 1);				
+		}
+		for (int i = 0; i < padsNum; i++) {
+			int startPadIndex = rand.nextInt(availableLocations.size() + 1);
+			Location startPad = availableLocations.get(startPadIndex);
+			grid += startPad.x + "," + startPad.y;
+			availableLocations.remove(startPadIndex);
+			int finishPadIndex = rand.nextInt(availableLocations.size() + 1);
+			Location finishPad = availableLocations.get(finishPadIndex);
+			grid += finishPad.x + "," + finishPad.y;
+			grid += "," + finishPad.x + "," + finishPad.y;
+			grid += "," + startPad.x + "," + startPad.y;
+			availableLocations.remove(startPadIndex);
+			availableLocations.remove(finishPadIndex);
+			// to add the comma after each hostage
+			if (i < padsNum - 2) {
+				grid += ",";
+			}
+		}
+		grid += ";";
+		grid += hostages;
+		System.out.println(grid);
+		return grid;
+	}
+
+	
+	public static ArrayList<Location> generateLocations(int m, int n){
+		ArrayList<Location> availableLocations = new ArrayList<Location>();
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				Location loc = new Location(i,j);
+				availableLocations.add(loc);
+			}
+		}
+		return availableLocations;
+	}
+	
+
+	public static String solve(String grid, String strategy, boolean visualize) {
+		String result = "";
+		result = generalSearch(grid, strategy, visualize);
+		return result;
+	}
+	
+	//method to print the content of any array
+	public static void printArr(ArrayList<String> arr) {
+		for (int i = 0; i < arr.size(); i++) {
+			System.out.println(arr.get(i));
+		}
+		System.out.println(" ");
+	}
+
+	public static void main(String[] args) {
+
+		String grid = genGrid();
+		//String grid0 = "5,5;2;4,3;2,1;2,0,0,4,0,3,0,1;3,1,3,2;4,4,3,3,3,3,4,4;4,0,17,1,2,54,0,0,46,4,1,22";
+		//String grid3 = "5,5;1;0,4;4,4;0,3,1,4,2,1,3,0,4,1;4,0;2,4,3,4,3,4,2,4;0,2,98,1,2,98,2,2,98,3,2,98,4,2,98,2,0,1";
+		//String grid1 = "5,5;1;1,4;1,0;0,4;0,0,2,2;3,4,4,2,4,2,3,4;0,2,32,0,1,38";
+		//String grid = "5,5;2;0,4;1,4;0,1,1,1,2,1,3,1,3,3,3,4;1,0,2,4;0,3,4,3,4,3,0,3;0,0,30,3,0,80,4,4,80";
+		//System.out.println(grid);
+		//System.out.println(solve(grid0, "ID", true));
+		//System.out.println(solve(grid, "UC", true));
+	}
+
+}
